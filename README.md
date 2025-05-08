@@ -105,5 +105,3 @@ This analysis reveals critical insights into NASA’s 1995 web traffic, highligh
 ✅ **Data-Driven Insights** – Key metrics highlighted.  
 ✅ **Actionable Recommendations** – Direct next steps.  
 ✅ **Technical + Accessible** – Useful for both engineers and managers.  
-
-Would you like any refinements (e.g., adding graphs, more technical details)?
