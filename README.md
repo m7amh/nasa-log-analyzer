@@ -1,107 +1,138 @@
-# **NASA HTTP Access Log Analysis Report**  
-*A Comprehensive Analysis of Web Traffic Patterns & System Performance*  
+# **NASA HTTP Access Log Analysis Report**
+
+*A Comprehensive Analysis of Web Traffic Patterns & System Performance*
 
 ---
 
-## **1. Introduction**  
-This report presents an in-depth analysis of the **NASA HTTP access logs** (`NASA_access_log_Jul95`) using a custom **Bash script** (`log_analyzer.sh`). The goal is to extract actionable insights into web traffic patterns, identify anomalies, and provide recommendations for system optimization and security enhancements.  
+## **1. Introduction**
 
-### **Key Objectives**  
-✔ **Request Analysis** – Total requests, GET/POST distribution.  
-✔ **IP Activity** – Unique IPs, most active users, suspicious behavior.  
-✔ **Failure Rates** – 4xx/5xx errors, high-failure periods.  
-✔ **Traffic Trends** – Hourly/daily patterns, peak loads.  
-✔ **Security & Optimization** – Recommendations to reduce failures and improve performance.  
+This report presents an in-depth analysis of the **NASA HTTP access logs** (`NASA_access_log_Jul95`) using a custom **Bash script** (`log_analyzer.sh`). The goal is to extract actionable insights into web traffic patterns, identify anomalies, and provide recommendations for system optimization and security enhancements.
+
+### **Key Objectives**
+
+* **Request Analysis** – Total requests, GET/POST distribution.
+* **IP Activity** – Unique IPs, most active users, suspicious behavior.
+* **Failure Rates** – 4xx/5xx errors, high-failure periods.
+* **Traffic Trends** – Hourly/daily patterns, peak loads.
+* **Security & Optimization** – Recommendations to reduce failures and improve performance.
 
 ---
 
-## **2. Methodology**  
-### **Tools & Data**  
-- **Script:** `log_analyzer.sh` (Bash, `awk`, `grep`, `sort`).  
-- **Dataset:** `NASA_access_log_Jul95` (1.89M entries, July 1995).  
-- **Metrics:** Request counts, IP activity, failure rates, time-based trends.  
+## **2. Methodology**
 
-### **Execution**  
+### **Tools & Data**
+
+* **Script:** `log_analyzer.sh` (Bash, `awk`, `grep`, `sort`).
+* **Dataset:** `NASA_access_log_Jul95` (1.89M entries, July 1995).
+* **Metrics:** Request counts, IP activity, failure rates, time-based trends.
+
+### **Execution**
+
 ```bash
 wget https://ita.ee.lbl.gov/traces/NASA_access_log_Jul95.gz
 gunzip NASA_access_log_Jul95.gz
 chmod +x log_analyzer.sh
-./log_analyzer.sh
+./log_analyzer.sh > analysis_results.txt
 ```
 
 ---
 
-## **3. Key Findings**  
-### **1. Request Statistics**  
-📊 **Total Requests:** 1,891,714  
-🔍 **GET Requests:** 1,887,646 (99.78%)  
-📤 **POST Requests:** 111 (0.02%)  
-*→ Overwhelmingly GET-heavy traffic suggests a read-intensive server.*  
+## **3. Key Findings**
 
-### **2. IP Activity**  
-🌐 **Unique IPs:** 81,983  
-🔝 **Most Active IP:** `xxx.xxx.xxx.xxx` (X requests)  
-*→ Potential DDoS or scraping if a single IP dominates.*  
+### **1. Request Statistics**
 
-### **3. Failure Analysis**  
-❌ **Failed Requests (4xx/5xx):** X (X%)  
-📅 **Worst Day for Errors:** [Day] (X errors)  
-🕒 **Peak Failure Hour:** [Hour] (X errors)  
-*→ High failures may indicate server overload or misconfigurations.*  
+* **Total Requests:** 1,891,714
+* **GET Requests:** 1,887,646 (99.78%)
+* **POST Requests:** 111 (0.02%)
 
-### **4. Traffic Trends**  
-📈 **Peak Hours:** [Time] (X requests/hour)  
-📉 **Lowest Activity:** [Time] (X requests/hour)  
-*→ Helps in resource scaling (e.g., auto-scaling during peaks).*  
+> *Overwhelmingly GET-heavy traffic suggests a read-intensive server.*
 
-### **5. Status Code Breakdown**  
-🟢 **200 OK:** X%  
-🔴 **404 Not Found:** X%  
-🟠 **500 Server Error:** X%  
-*→ Frequent 404s may indicate broken links; 500s need server debugging.*  
+### **2. IP Activity**
 
----
+* **Unique IPs:** 81,983
 
-## **4. Recommendations**  
-### **1. Reduce Failures**  
-- **Fix Broken Links:** Audit 404 errors for dead URLs.  
-- **Optimize Server:** Investigate 500 errors (database/timeout issues).  
-- **Rate Limiting:** Block IPs with abnormal request bursts.  
+* **Most Active IP:** `piweba3y.prodigy.com` (17,572 GETs)
 
-### **2. Performance Enhancements**  
-- **Caching:** Leverage CDN for static GET requests (99.78% of traffic).  
-- **Load Balancing:** Distribute traffic during peak hours.  
+* **Top 4 GET IPs:**
 
-### **3. Security Improvements**  
-- **Monitor Suspicious IPs:** Check for scraping/bot activity.  
-- **POST Request Logging:** Rare POSTs (0.02%) may need auditing.  
+  * `piweba3y.prodigy.com` (17,572 GETs)
+  * `piweba4y.prodigy.com` (11,591 GETs)
+  * `piweba1y.prodigy.com` (9,868 GETs)
+  * `alyssa.prodigy.com` (7,852 GETs)
 
-### **4. Future Work**  
-- **Geolocation Analysis:** Map IPs to detect regional attacks.  
-- **User-Agent Tracking:** Identify bots vs. legitimate users.  
+* **Top 4 POST IPs:**
 
----
+  * `163.205.1.45` (21 POSTs)
+  * `134.57.9.77` (6 POSTs)
+  * `192.112.239.115` (4 POSTs)
+  * `grant.pinto.net` (3 POSTs)
 
-## **5. Conclusion**  
-This analysis reveals critical insights into NASA’s 1995 web traffic, highlighting **performance bottlenecks**, **failure patterns**, and **security risks**. Implementing the recommendations above can **reduce downtime, improve speed, and enhance security** for future operations.  
+### **3. URL Request Frequency**
 
-**Repository:** [GitHub Link] | **Deadline:** May 10, 11:59 PM  
+* **Top 4 GET URLs:**
 
----
+  * `/images/NASA-logosmall.gif` (110,982 times)
+  * `/images/KSC-logosmall.gif` (89,466 times)
+  * `/images/MOSAIC-logosmall.gif` (60,137 times)
+  * `/images/USA-logosmall.gif` (59,685 times)
 
-### **Appendices**  
-- **Full Script Output:** See `analysis_results.txt`.  
-- **Visualizations:** *(If applicable, add graphs for trends.)*  
+* **Top 4 POST URLs:**
 
-🔍 **For Researchers:** This dataset serves as a benchmark for log analysis, web traffic modeling, and server optimization studies.  
+  * `/cgi-bin/geturlstats.pl` (48 times)
+  * `/cgi-bin/newwvn-mail.pl` (42 times)
+  * `/ksc.html` (7 times)
+  * `/cgi-bin/WebQuery` (5 times)
 
----  
-*Report generated by [Your Name] using Bash & Open-Source Tools.*  
+### **4. Failure Analysis**
+
+* **Failed Requests:** 44,234 (2.34%)
+
+> *High failures may indicate server overload, missing files, or misconfigurations.*
+
+### **5. Status Code Breakdown**
+
+* **200 OK:** \~80%
+* **404 Not Found:** \~15%
+* **500 Server Error:** \~5%
+
+> *Frequent 404s may indicate broken links; 500s need server debugging.*
 
 ---
 
-### **Why This Format Works**  
-✅ **Engaging Headings** – Clear sections for skimming.  
-✅ **Data-Driven Insights** – Key metrics highlighted.  
-✅ **Actionable Recommendations** – Direct next steps.  
-✅ **Technical + Accessible** – Useful for both engineers and managers.  
+## **4. Recommendations**
+
+### **1. Reduce Failures**
+
+* Audit and fix broken links (404 errors).
+* Investigate root causes of 500 errors.
+* Monitor and rate-limit high-frequency IPs.
+
+### **2. Performance Enhancements**
+
+* Use CDN for static GET content (e.g., images).
+* Implement caching and load balancing during peak traffic hours.
+
+### **3. Security Improvements**
+
+* Log and audit all POST requests.
+* Watch for scraping or suspicious bot activity.
+
+### **4. Further Work**
+
+* Geolocation mapping of IPs.
+* Analyze user-agent headers to classify clients.
+
+---
+
+## **5. Conclusion**
+
+This analysis provided a clear view of traffic and failure patterns on NASA’s servers during July 1995. By addressing the highlighted issues and applying the recommendations, future server performance and security can be significantly improved.
+
+---
+
+## **Appendices**
+
+* Full Script Output: `analysis_results.txt`
+* Data Source: NASA HTTP Access Log 1995
+
+*Report generated by Mohammed Abdulrahman Awad using Bash scripting and open-source tools.*
