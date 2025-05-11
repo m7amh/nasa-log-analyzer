@@ -48,17 +48,32 @@ echo -e "\nMost Active IP:"
 awk '/\[.*\] "[A-Z]+ .* HTTP\// {print $1}' "$LOG_FILE" | sort | uniq -c | sort -nr | head -1 | awk '{print $2, "(" $1 " requests)"}'
 
 # 6. Daily Average Requests
-days=$(awk '/\[.*\] "[A-Z]+ .* HTTP\// {match($0, /\[([0-9]+\/[A-Za-z]+\/[0-9]+)/, d); print d[1]}' "$LOG_FILE" | sort | uniq | wc -l)
+days=$(awk '/\[.*\] "[A-Z]+ .* HTTP\// {match($0, /\[([0-9]{2})\/([A-Za-z]+)\/([0-9]{4})/, d); print d[1]"/"d[2]"/"d[3]}' "$LOG_FILE" | sort | uniq | wc -l)
 daily_avg=$(awk -v total="$total_requests" -v days="$days" 'BEGIN {printf "%.0f", total/days}')
 echo "Daily Average Requests: $daily_avg"
 
 # 7. Day with Most Failures
 echo -e "\nDay with Most Failures:"
-awk '/\[.*\] "[A-Z]+ .* HTTP\// && $9 ~ /^[45][0-9][0-9]/ {match($0, /\[([0-9]+\/[A-Za-z]+\/[0-9]+)/, d); print d[1]}' "$LOG_FILE" | sort | uniq -c | sort -nr | head -1 | awk '{print $2, "(" $1 " failures)"}'
+awk '/\[.*\] "[A-Z]+ .* HTTP\// && $9 ~ /^[45][0-9][0-9]/ {
+    match($0, /\[([0-9]{2})\/([A-Za-z]+)\/([0-9]{4})/, d);
+    print d[1]"/"d[2]"/"d[3]
+}' "$LOG_FILE" | sort | uniq -c | sort -nr | head -1 | awk '{print $2, "(" $1 " failures)"}'
 
-# 8. Requests by Hour
+# 8. Requests by Hour (Fixed)
 echo -e "\nRequests per Hour:"
-awk '/\[.*\] "[A-Z]+ .* HTTP\// {match($0, /\[.*:([0-9]{2}):/, a); print a[1]}' "$LOG_FILE" | sort | uniq -c | sort -k2n | awk '{print "Hour", $2, ":", $1}'
+awk '/\[.*\] "[A-Z]+ .* HTTP\// {
+    if (match($0, /\[[^:]+:([0-9]{2}):[0-9]{2}:[0-9]{2}/, a)) {
+        hour = a[1]
+        if (hour >= 0 && hour <= 23) {
+            count[hour]++
+        }
+    }
+}
+END {
+    for (h = 0; h < 24; h++) {
+        printf "Hour %02d : %d\n", h, count[h]+0
+    }
+}' "$LOG_FILE" | sort -k2n
 
 # 9. Status Code Breakdown
 echo -e "\nStatus Code Frequency:"
@@ -86,18 +101,36 @@ grep -a '"POST ' "$LOG_FILE" | awk '{print $1}' | sort | uniq -c | sort -nr | he
 echo -e "\nTop 4 URLs requested via POST:"
 grep -a '"POST ' "$LOG_FILE" | awk -F\" '{print $2}' | awk '{print $2}' | sort | uniq -c | sort -nr | head -4 | awk '{print $2, "(" $1 " times)"}'
 
-# 11. Failure Patterns by Hour
+# 11. Failure Patterns by Hour (Fixed)
 echo -e "\nFailure Requests by Hour:"
-awk '/\[.*\] "[A-Z]+ .* HTTP\// && $9 ~ /^[45][0-9][0-9]/ {match($0, /\[.*:([0-9]{2}):/, a); print a[1]}' "$LOG_FILE" | sort | uniq -c | sort -nr | awk '{print "Hour", $2, ":", $1}'
+awk '/\[.*\] "[A-Z]+ .* HTTP\// && $9 ~ /^[45][0-9][0-9]/ {
+    if (match($0, /\[[^:]+:([0-9]{2}):[0-9]{2}:[0-9]{2}/, a)) {
+        hour = a[1]
+        if (hour >= 0 && hour <= 23) {
+            count[hour]++
+        }
+    }
+}
+END {
+    for (h = 0; h < 24; h++) {
+        printf "Hour %02d : %d\n", h, count[h]+0
+    }
+}' "$LOG_FILE" | sort -k3nr
 
-# 12. Request Trends
+# 12. Request Trends (Fixed)
 echo -e "\nRequest Trends:"
-awk '/\[.*\] "[A-Z]+ .* HTTP\// {match($0, /\[.*:([0-9]{2}):/, a); hour=a[1]; count[hour]++} END {
+awk '/\[.*\] "[A-Z]+ .* HTTP\// {
+    match($0, /\[.*:([0-9]{2}):/, a);
+    hour=a[1]+0;
+    if (hour >= 0 && hour <= 23) count[hour]++;
+}
+END {
     for (h=0; h<24; h++) {
-        c=count[h]+0; if (c>0) {
-            if (h>0 && count[h-1]+0>0) {
-                trend=(c>count[h-1])?"Increasing":"Decreasing";
-                print "Hour", h, ":", c, "(" trend " from Hour", h-1 ")"
+        c = count[h]+0;
+        if (c > 0) {
+            if (h > 0 && count[h-1]+0 > 0) {
+                trend = (c > count[h-1]) ? "Increasing" : "Decreasing";
+                printf("Hour %02d : %d (%s from Hour %02d)\n", h, c, trend, h-1);
             }
         }
     }
